@@ -1,0 +1,29 @@
+{
+  "name": "monitoring-landslides-broker",
+  "version": "1.0.0",
+  "description": "Broker in node js to receive measured data on slopes.",
+  "main": "broker.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon ./broker.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LucasLeocardo/monitoring-landslides-broker.git"
+  },
+  "author": "Lucas Leocardo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/LucasLeocardo/monitoring-landslides-broker/issues"
+  },
+  "homepage": "https://github.com/LucasLeocardo/monitoring-landslides-broker#readme",
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "jsonschema": "^1.2.6",
+    "mongoose": "^6.2.7",
+    "mosca": "^2.8.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}
