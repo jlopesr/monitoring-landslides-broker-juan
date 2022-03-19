@@ -28,20 +28,16 @@ broker.on('clientConnected', function(client) {
 broker.on('published', function(packet, client) {
     const packetTopic = packet.topic.toString();
     if(isMongoConnected && packetTopic == 'vibrationData') {
-        saveVibrationData(packet);
+        var packetData = JSON.parse(packet.payload.toString());
+        saveVibrationData(packetData, client.id);
     }
 });
 
 
-async function saveVibrationData(packet) {
-    const packetContent = packet.payload.toString();
-    var dataInfo = packetContent.split(',');
-    const vibration = {
-        deviceId: mongoose.Types.ObjectId(dataInfo[0]),
-        acelX: Number(dataInfo[1]),
-        acelY: Number(dataInfo[2]),
-        acelZ: Number(dataInfo[3])
-    };
+async function saveVibrationData(packetData, clientId) {
+    client = {deviceId: mongoose.Types.ObjectId(clientId)};
+    const vibration = Object.assign({}, client, packetData);
+    //console.log(vibration);
     try {
         await Vibration.create(vibration);
         console.log('====================Data saved in Mongo DB!====================');
