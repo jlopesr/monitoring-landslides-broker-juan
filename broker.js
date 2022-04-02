@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const mosca = require('mosca');
 require('dotenv').config();
 const Vibration = require('./models/Vibration');
+const Humidity = require('./models/Humidity');
+const Temperature = require('./models/Temperature');
 
 const DB_USER = process.env.DB_USER;
 const DB_PASSWORD = process.env.DB_PASSWORD;
@@ -29,19 +31,52 @@ broker.on('published', function(packet, client) {
     const packetTopic = packet.topic.toString();
     if(isMongoConnected && packetTopic == 'vibrationData') {
         var packetData = JSON.parse(packet.payload.toString());
-        saveVibrationData(packetData, client.id);
+        saveVibrationData(packetData);
+    }
+    else if (isMongoConnected && packetTopic == 'humidityData') {
+        var packetData = JSON.parse(packet.payload.toString());
+        saveHumidityData(packetData);
+    }
+    else if (isMongoConnected && packetTopic == 'temperatureData') {
+        var packetData = JSON.parse(packet.payload.toString());
+        saveTemperatureData(packetData);
     }
 });
 
 
-async function saveVibrationData(packetData, clientId) {
-    client = {deviceId: mongoose.Types.ObjectId(clientId)};
-    const vibration = Object.assign({}, client, packetData);
-    //console.log(vibration);
+async function saveVibrationData(packetData) {
+    packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
+    const vibration = Object.assign({}, packetData);
     try {
         await Vibration.create(vibration);
         console.log('====================Data saved in Mongo DB!====================');
         console.log(vibration);
+    }
+    catch (error) {
+        console.log(error);
+    }
+}
+
+async function saveHumidityData(packetData) {
+    packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
+    const humidity = Object.assign({}, packetData);
+    try {
+        await Humidity.create(humidity);
+        console.log('====================Data saved in Mongo DB!====================');
+        console.log(humidity);
+    }
+    catch (error) {
+        console.log(error);
+    }
+}
+
+async function saveTemperatureData(packetData) {
+    packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
+    const temperature = Object.assign({}, packetData);
+    try {
+        await Temperature.create(temperature);
+        console.log('====================Data saved in Mongo DB!====================');
+        console.log(temperature);
     }
     catch (error) {
         console.log(error);

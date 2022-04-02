@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon ./broker.js",
-    "local": "nodemon ./pub.js"
+    "humidity-pub": "nodemon ./humidity-pub-client.js",
+    "temperature-pub": "nodemon ./temperature-pub-client.js"
   },
   "repository": {
     "type": "git",
