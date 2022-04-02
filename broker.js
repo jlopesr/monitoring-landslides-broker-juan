@@ -49,7 +49,7 @@ async function saveVibrationData(packetData) {
     const vibration = Object.assign({}, packetData);
     try {
         await Vibration.create(vibration);
-        console.log('====================Data saved in Mongo DB!====================');
+        console.log('====================Vibration Data saved in Mongo DB!====================');
         console.log(vibration);
     }
     catch (error) {
@@ -62,7 +62,7 @@ async function saveHumidityData(packetData) {
     const humidity = Object.assign({}, packetData);
     try {
         await Humidity.create(humidity);
-        console.log('====================Data saved in Mongo DB!====================');
+        console.log('====================Humidity Data saved in Mongo DB!====================');
         console.log(humidity);
     }
     catch (error) {
@@ -75,7 +75,7 @@ async function saveTemperatureData(packetData) {
     const temperature = Object.assign({}, packetData);
     try {
         await Temperature.create(temperature);
-        console.log('====================Data saved in Mongo DB!====================');
+        console.log('====================Temperature Data saved in Mongo DB!====================');
         console.log(temperature);
     }
     catch (error) {
