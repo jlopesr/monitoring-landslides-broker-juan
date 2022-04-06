@@ -7,7 +7,7 @@ client.on('connect', () => {
     setInterval(() => {
         var message = {
             deviceId: deviceId,
-            ho: getRandomInt(0, 100),
+            h0: getRandomInt(0, 100),
             h1: getRandomInt(0, 100),
             h2: getRandomInt(0, 100),
             h3: getRandomInt(0, 100),
