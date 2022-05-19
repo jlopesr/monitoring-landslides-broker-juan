@@ -4,6 +4,7 @@ require('dotenv').config();
 const Vibration = require('./models/Vibration');
 const Humidity = require('./models/Humidity');
 const Temperature = require('./models/Temperature');
+const Device = require('./models/Device');
 
 const DB_USER = process.env.DB_USER;
 const DB_PASSWORD = process.env.DB_PASSWORD;
@@ -43,6 +44,15 @@ broker.on('published', function(packet, client) {
     }
 });
 
+async function isDeviceWorking(deviceId) {
+    const device = await Device.findOne({_id: deviceId, isActive: true});
+    if (device) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
 
 async function saveVibrationData(packetData) {
     packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
