@@ -1,7 +1,7 @@
 var mqtt = require('mqtt');
 var client = mqtt.connect('mqtt://localhost:1883');
 var topic = 'humidityData';
-var deviceId = '6233d19e5a995b97fd288d08';
+var deviceId = '628eccd5aa6849c399d00ee6';
 
 client.on('connect', () => {
     setInterval(() => {
