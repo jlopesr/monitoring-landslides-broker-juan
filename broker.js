@@ -8,7 +8,8 @@ const Device = require('./models/Device');
 
 const DB_USER = process.env.DB_USER;
 const DB_PASSWORD = process.env.DB_PASSWORD;
-const settings = {port: 1883};
+const PORT = process.env.PORT;
+const settings = {port: Number(PORT)};
 let isMongoConnected = false;
 
 mongoose.connect(`mongodb+srv://${DB_USER}:${DB_PASSWORD}@field-data-cluster.xz66x.mongodb.net/fieldData?retryWrites=true&w=majority`)

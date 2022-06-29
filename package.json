@@ -5,7 +5,8 @@
   "main": "broker.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon ./broker.js",
+    "dev": "nodemon ./broker.js",
+    "start": "node ./broker.js",
     "humidity-pub": "nodemon ./humidity-pub-client.js",
     "temperature-pub": "nodemon ./temperature-pub-client.js"
   },
