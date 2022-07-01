@@ -1,9 +1,10 @@
 var mqtt = require('mqtt');
-var client = mqtt.connect('mqtt://localhost:1883');
+var client = mqtt.connect('ws://localhost:1883');
 var topic = 'temperatureData';
 var deviceId = '628eccd5aa6849c399d00ee6';
 
 client.on('connect', () => {
+    console.log('Connected to broker!')
     setInterval(() => {
         var message = {
             deviceId: deviceId,

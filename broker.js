@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
-const mosca = require('mosca');
+const aedes = require("aedes")();
+const httpServer = require("http").createServer();
+const ws = require("websocket-stream");
 require('dotenv').config();
 const Vibration = require('./models/Vibration');
 const Humidity = require('./models/Humidity');
@@ -9,7 +11,6 @@ const Device = require('./models/Device');
 const DB_USER = process.env.DB_USER;
 const DB_PASSWORD = process.env.DB_PASSWORD;
 const PORT = process.env.PORT;
-const settings = {port: Number(PORT)};
 let isMongoConnected = false;
 
 mongoose.connect(`mongodb+srv://${DB_USER}:${DB_PASSWORD}@field-data-cluster.xz66x.mongodb.net/fieldData?retryWrites=true&w=majority`)
@@ -19,17 +20,22 @@ mongoose.connect(`mongodb+srv://${DB_USER}:${DB_PASSWORD}@field-data-cluster.xz6
     })
     .catch((error) => {console.log(error);});
 
-var broker = new mosca.Server(settings);
+ws.createServer({ server: httpServer }, aedes.handle);
 
-broker.on('ready', () => {
-    console.log('Mosca server is up and running');
+httpServer.listen(PORT, () => {
+    console.log("websocket server listening on port ", PORT);
 });
 
-broker.on('clientConnected', function(client) {
-    console.log('client connected', client.id);
+aedes.on('client', function(client) {
+    console.log('Client connected! id: ' + client.id);
 });
 
-broker.on('published', function(packet, client) {
+aedes.on('clientDisconnect', function (client) {
+    console.log('client disconnected! id: ' + client.id);
+
+});
+
+aedes.on('publish', function(packet, client) {
     const packetTopic = packet.topic.toString();
     if(isMongoConnected && packetTopic == 'vibrationData') {
         var packetData = JSON.parse(packet.payload.toString());
