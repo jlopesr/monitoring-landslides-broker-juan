@@ -1,1 +1,1 @@
-web: npm run aedes
+web: npm start
