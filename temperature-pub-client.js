@@ -1,5 +1,7 @@
 var mqtt = require('mqtt');
-var client = mqtt.connect('ws://localhost:1883');
+var client = mqtt.connect('https://localhost:1883');
+//http://localhost:1883
+//ws://monitoring-landslides-broker.herokuapp.com
 var topic = 'temperatureData';
 var deviceId = '628eccd5aa6849c399d00ee6';
 
@@ -19,7 +21,7 @@ client.on('connect', () => {
             t8: getRandomInt(0, 35),
             t9: getRandomInt(0, 35)
         }
-        client.publish(topic, JSON.stringify(message));
+        //client.publish(topic, JSON.stringify(message));
         console.log('===================message sent!===================');
         console.log(message);
     }, 5000);
