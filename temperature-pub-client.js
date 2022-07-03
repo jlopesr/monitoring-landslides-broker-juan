@@ -1,5 +1,5 @@
 var mqtt = require('mqtt');
-var client = mqtt.connect('https://localhost:1883');
+var client = mqtt.connect('ws://monitoring-landslides-broker.herokuapp.com');
 //http://localhost:1883
 //ws://monitoring-landslides-broker.herokuapp.com
 var topic = 'temperatureData';

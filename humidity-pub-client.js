@@ -1,5 +1,5 @@
 var mqtt = require('mqtt');
-var client = mqtt.connect('https://localhost:1883');
+var client = mqtt.connect('http://localhost:1883');
 var topic = 'humidityData';
 var deviceId = '628eccd5aa6849c399d00ee6';
 
