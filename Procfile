@@ -1,1 +1,1 @@
-web: node ./broker-aedes.js
+web: npm start
