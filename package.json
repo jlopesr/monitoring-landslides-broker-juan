@@ -5,8 +5,8 @@
   "main": "broker.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon ./ws-broker.js",
-    "start": "node ./ws-broker.js",
+    "dev-ws-aedes": "nodemon ./ws-broker-aedes.js",
+    "start": "node ./ws-broker-aedes.js",
     "mosca": "node ./broker-mosca.js",
     "aedes": "node ./broker-aedes.js",
     "dev-mosca": "nodemon ./broker-mosca.js",

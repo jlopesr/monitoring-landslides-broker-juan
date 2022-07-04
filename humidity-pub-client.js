@@ -1,5 +1,7 @@
 var mqtt = require('mqtt');
-var client = mqtt.connect('http://localhost:1883');
+var client = mqtt.connect('ws://monitoring-landslides-broker.herokuapp.com');
+//http://localhost:1883
+//ws://monitoring-landslides-broker.herokuapp.com
 var topic = 'humidityData';
 var deviceId = '628eccd5aa6849c399d00ee6';
 

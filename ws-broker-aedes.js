@@ -23,7 +23,7 @@ mongoose.connect(`mongodb+srv://${DB_USER}:${DB_PASSWORD}@field-data-cluster.xz6
 ws.createServer({ server: httpServer }, aedes.handle);
 
 httpServer.listen(PORT, () => {
-    console.log("websocket server listening on port ", PORT);
+    console.log("Broker websocket server listening on port ", PORT);
 });
 
 aedes.on('client', function(client) {
