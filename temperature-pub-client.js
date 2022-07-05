@@ -6,7 +6,7 @@ var topic = 'temperatureData';
 var deviceId = '628eccd5aa6849c399d00ee6';
 var username = process.env.BROKER_USER_NAME;
 var password = process.env.BROKER_PASSWORD;
-var client = mqtt.connect('ws://localhost:1883', {username, password});
+var client = mqtt.connect('ws://monitoring-landslides-broker.herokuapp.com', {username, password});
 
 client.on('connect', () => {
     console.log('Connected to broker!')
