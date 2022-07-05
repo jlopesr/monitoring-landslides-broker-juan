@@ -11,6 +11,8 @@ const Device = require('./models/Device');
 const DB_USER = process.env.DB_USER;
 const DB_PASSWORD = process.env.DB_PASSWORD;
 const PORT = process.env.PORT;
+const BROKER_USER_NAME = process.env.BROKER_USER_NAME;
+const BROKER_PASSWORD = process.env.BROKER_PASSWORD;
 let isMongoConnected = false;
 
 mongoose.connect(`mongodb+srv://${DB_USER}:${DB_PASSWORD}@field-data-cluster.xz66x.mongodb.net/fieldData?retryWrites=true&w=majority`)
@@ -25,6 +27,17 @@ ws.createServer({ server: httpServer }, aedes.handle);
 httpServer.listen(PORT, () => {
     console.log("Broker websocket server listening on port ", PORT);
 });
+
+aedes.authenticate = (client, username, password, callback) => {
+    const receivedPassword = Buffer.from(password, 'base64').toString();
+    if ((username === BROKER_USER_NAME) && (receivedPassword === BROKER_PASSWORD)) {
+        return callback(null, true);
+    } else {
+        const error = new Error('Authentication Failed!! Please enter the correct credentials.');
+        console.log('Authentication failed for Client ID: ' + client.id);
+        return callback(error, false);
+    }
+}
 
 aedes.on('client', function(client) {
     console.log('Client connected! id: ' + client.id);

@@ -1,9 +1,12 @@
 var mqtt = require('mqtt');
-var client = mqtt.connect('ws://monitoring-landslides-broker.herokuapp.com');
+require('dotenv').config();
 //http://localhost:1883
 //ws://monitoring-landslides-broker.herokuapp.com
 var topic = 'humidityData';
 var deviceId = '628eccd5aa6849c399d00ee6';
+var username = process.env.BROKER_USER_NAME;
+var password = process.env.BROKER_PASSWORD;
+var client = mqtt.connect('ws://monitoring-landslides-broker.herokuapp.com', {username, password});
 
 client.on('connect', () => {
     setInterval(() => {
