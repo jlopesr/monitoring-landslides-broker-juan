@@ -30,8 +30,6 @@ httpServer.listen(PORT, () => {
 
 aedes.authenticate = (client, username, password, callback) => {
     const receivedPassword = Buffer.from(password, 'base64').toString();
-    console.log('UserName: ' + username);
-    console.log('Password: ' + password);
     if ((username === BROKER_USER_NAME) && (receivedPassword === BROKER_PASSWORD)) {
         return callback(null, true);
     } else {
