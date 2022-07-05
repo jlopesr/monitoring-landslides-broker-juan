@@ -50,21 +50,21 @@ aedes.on('clientDisconnect', function (client) {
 
 aedes.on('publish', function(packet, client) {
     const packetTopic = packet.topic.toString();
-    if(isMongoConnected && packetTopic == 'vibrationData') {
+    if(packetTopic == 'vibrationData') {
         var packetData = JSON.parse(packet.payload.toString());
         saveVibrationData(packetData);
     }
-    else if (isMongoConnected && packetTopic == 'humidityData') {
+    else if (packetTopic == 'humidityData') {
         var packetData = JSON.parse(packet.payload.toString());
         saveHumidityData(packetData);
     }
-    else if (isMongoConnected && packetTopic == 'temperatureData') {
+    else if (packetTopic == 'temperatureData') {
         var packetData = JSON.parse(packet.payload.toString());
         saveTemperatureData(packetData);
     }
 });
 
-async function isDeviceWorking(deviceId) {
+async function checkIsDeviceWorking(deviceId) {
     const device = await Device.findOne({_id: deviceId, isActive: true});
     if (device) {
         return true;
@@ -75,6 +75,10 @@ async function isDeviceWorking(deviceId) {
 }
 
 async function saveVibrationData(packetData) {
+    const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId);
+    if (!isDeviceWorking) {
+        return;
+    }
     packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
     const vibration = Object.assign({}, packetData);
     try {
@@ -88,6 +92,10 @@ async function saveVibrationData(packetData) {
 }
 
 async function saveHumidityData(packetData) {
+    const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId);
+    if (!isDeviceWorking) {
+        return;
+    }
     packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
     const humidity = Object.assign({}, packetData);
     try {
@@ -101,6 +109,10 @@ async function saveHumidityData(packetData) {
 }
 
 async function saveTemperatureData(packetData) {
+    const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId);
+    if (!isDeviceWorking) {
+        return;
+    }
     packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
     const temperature = Object.assign({}, packetData);
     try {
