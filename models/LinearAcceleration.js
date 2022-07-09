@@ -1,14 +1,11 @@
 const mongoose = require('mongoose');
 
-const Vibration = mongoose.model('Vibration', {
+const LinearAcceleration = mongoose.model('LinearAcceleration', {
     acelX: Number,
     acelY: Number,
     acelZ: Number,
-    alphaX: Number,
-    alphaY: Number,
-    alphaZ: Number,
     deviceId: mongoose.ObjectId,
     timestamp: { type: Date, default: Date.now }
 });
 
-module.exports = Vibration;
+module.exports = LinearAcceleration;

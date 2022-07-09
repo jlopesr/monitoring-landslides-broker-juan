@@ -1,27 +1,28 @@
 var mqtt = require('mqtt');
 require('dotenv').config();
-//http://localhost:1883
+//ws://localhost:1883
 //ws://monitoring-landslides-broker.herokuapp.com
-var topic = 'humidityData';
+var topic = 'poroPressureData';
 var deviceId = '628eccd5aa6849c399d00ee6';
 var username = process.env.BROKER_USER_NAME;
 var password = process.env.BROKER_PASSWORD;
 var client = mqtt.connect('ws://monitoring-landslides-broker.herokuapp.com', {username, password});
 
 client.on('connect', () => {
+    console.log('Connected to broker!')
     setInterval(() => {
         var message = {
             deviceId: deviceId,
             value: getRandomInt(0, 100)
-            // h1: getRandomInt(0, 100),
-            // h2: getRandomInt(0, 100),
-            // h3: getRandomInt(0, 100),
-            // h4: getRandomInt(0, 100),
-            // h5: getRandomInt(0, 100),
-            // h6: getRandomInt(0, 100),
-            // h7: getRandomInt(0, 100),
-            // h8: getRandomInt(0, 100),
-            // h9: getRandomInt(0, 100)
+            // t1: getRandomInt(0, 35),
+            // t2: getRandomInt(0, 35),
+            // t3: getRandomInt(0, 35),
+            // t4: getRandomInt(0, 35),
+            // t5: getRandomInt(0, 35),
+            // t6: getRandomInt(0, 35),
+            // t7: getRandomInt(0, 35),
+            // t8: getRandomInt(0, 35),
+            // t9: getRandomInt(0, 35)
         }
         client.publish(topic, JSON.stringify(message));
         console.log('===================message sent!===================');

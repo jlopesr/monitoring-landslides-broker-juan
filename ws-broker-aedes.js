@@ -3,9 +3,12 @@ const aedes = require("aedes")();
 const httpServer = require("http").createServer();
 const ws = require("websocket-stream");
 require('dotenv').config();
-const Vibration = require('./models/Vibration');
+const LinearAcceleration = require('./models/LinearAcceleration');
+const AngularAcceleration = require('./models/AngularAcceleration');
 const Humidity = require('./models/Humidity');
 const Temperature = require('./models/Temperature');
+const RainfallLevel = require('./models/RainfallLevel');
+const PoroPressure = require('./models/PoroPressure');
 const Device = require('./models/Device');
 
 const DB_USER = process.env.DB_USER;
@@ -50,10 +53,14 @@ aedes.on('clientDisconnect', function (client) {
 
 aedes.on('publish', function(packet, client) {
     const packetTopic = packet.topic.toString();
-    if(packetTopic == 'vibrationData') {
+    if(packetTopic == 'linearAccelerationData') {
         var packetData = JSON.parse(packet.payload.toString());
-        saveVibrationData(packetData);
+        saveLinearAccelerationData(packetData);
     }
+    else if (packetTopic == 'angularAccelerationData') {
+        var packetData = JSON.parse(packet.payload.toString());
+        saveAngularAccelerationData(packetData);
+    } 
     else if (packetTopic == 'humidityData') {
         var packetData = JSON.parse(packet.payload.toString());
         saveHumidityData(packetData);
@@ -61,6 +68,14 @@ aedes.on('publish', function(packet, client) {
     else if (packetTopic == 'temperatureData') {
         var packetData = JSON.parse(packet.payload.toString());
         saveTemperatureData(packetData);
+    }
+    else if (packetTopic == 'rainfallLevelData') {
+        var packetData = JSON.parse(packet.payload.toString());
+        saveRainfallLevelData(packetData);
+    }
+    else if (packetTopic == 'poroPressureData') {
+        var packetData = JSON.parse(packet.payload.toString());
+        savePoroPressureData(packetData);
     }
 });
 
@@ -74,7 +89,7 @@ async function checkIsDeviceWorking(deviceId) {
     }
 }
 
-async function saveVibrationData(packetData) {
+async function saveLinearAccelerationData(packetData) {
     const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId);
     if (!isDeviceWorking) {
         return;
@@ -82,8 +97,25 @@ async function saveVibrationData(packetData) {
     packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
     const vibration = Object.assign({}, packetData);
     try {
-        await Vibration.create(vibration);
-        console.log('====================Vibration Data saved in Mongo DB!====================');
+        await LinearAcceleration.create(vibration);
+        console.log('====================Linear Acceleration Data saved in Mongo DB!====================');
+        console.log(vibration);
+    }
+    catch (error) {
+        console.log(error);
+    }
+}
+
+async function saveAngularAccelerationData(packetData) {
+    const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId);
+    if (!isDeviceWorking) {
+        return;
+    }
+    packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
+    const vibration = Object.assign({}, packetData);
+    try {
+        await AngularAcceleration.create(vibration);
+        console.log('====================Angular Acceleration Data saved in Mongo DB!====================');
         console.log(vibration);
     }
     catch (error) {
@@ -119,6 +151,40 @@ async function saveTemperatureData(packetData) {
         await Temperature.create(temperature);
         console.log('====================Temperature Data saved in Mongo DB!====================');
         console.log(temperature);
+    }
+    catch (error) {
+        console.log(error);
+    }
+}
+
+async function saveRainfallLevelData(packetData) {
+    const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId);
+    if (!isDeviceWorking) {
+        return;
+    }
+    packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
+    const rainfallLevel = Object.assign({}, packetData);
+    try {
+        await RainfallLevel.create(rainfallLevel);
+        console.log('====================Rainfall level Data saved in Mongo DB!====================');
+        console.log(rainfallLevel);
+    }
+    catch (error) {
+        console.log(error);
+    }
+}
+
+async function savePoroPressureData(packetData) {
+    const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId);
+    if (!isDeviceWorking) {
+        return;
+    }
+    packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
+    const poroPressure = Object.assign({}, packetData);
+    try {
+        await PoroPressure.create(poroPressure);
+        console.log('====================Poro pressure Data saved in Mongo DB!====================');
+        console.log(poroPressure);
     }
     catch (error) {
         console.log(error);

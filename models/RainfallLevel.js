@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 
-const Humidity = mongoose.model('Humidity', {
+const RainfallLevel = mongoose.model('RainfallLevel', {
     value: Number,
     deviceId: mongoose.ObjectId,
     timestamp: { type: Date, default: Date.now }
 });
 
-module.exports = Humidity;
+module.exports = RainfallLevel;
