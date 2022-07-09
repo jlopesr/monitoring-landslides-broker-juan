@@ -79,8 +79,16 @@ aedes.on('publish', function(packet, client) {
     }
 });
 
-async function checkIsDeviceWorking(deviceId) {
-    const device = await Device.findOne({_id: deviceId, isActive: true});
+async function checkIsDeviceWorking(deviceId, measurementType) {
+    const device = await Device.findOne({
+        _id: deviceId, 
+        isActive: true, 
+        measuredDataTypes: {
+            $elemMatch: {
+                measurementType: measurementType
+            }
+        }
+    });
     if (device) {
         return true;
     }
@@ -90,7 +98,7 @@ async function checkIsDeviceWorking(deviceId) {
 }
 
 async function saveLinearAccelerationData(packetData) {
-    const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId);
+    const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId, 'Linear Acceleration');
     if (!isDeviceWorking) {
         return;
     }
@@ -107,7 +115,7 @@ async function saveLinearAccelerationData(packetData) {
 }
 
 async function saveAngularAccelerationData(packetData) {
-    const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId);
+    const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId, 'Angular Acceleration');
     if (!isDeviceWorking) {
         return;
     }
@@ -124,7 +132,7 @@ async function saveAngularAccelerationData(packetData) {
 }
 
 async function saveHumidityData(packetData) {
-    const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId);
+    const isDeviceWorking =  await checkIsDeviceWorking(packetData.deviceId, 'Humidity');
     if (!isDeviceWorking) {
         return;
     }
@@ -141,7 +149,7 @@ async function saveHumidityData(packetData) {
 }
 
 async function saveTemperatureData(packetData) {
-    const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId);
+    const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId, 'Temperature');
     if (!isDeviceWorking) {
         return;
     }
@@ -158,7 +166,7 @@ async function saveTemperatureData(packetData) {
 }
 
 async function saveRainfallLevelData(packetData) {
-    const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId);
+    const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId, 'Rainfall Level');
     if (!isDeviceWorking) {
         return;
     }
@@ -175,7 +183,7 @@ async function saveRainfallLevelData(packetData) {
 }
 
 async function savePoroPressureData(packetData) {
-    const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId);
+    const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId, 'Pore Pressure');
     if (!isDeviceWorking) {
         return;
     }
