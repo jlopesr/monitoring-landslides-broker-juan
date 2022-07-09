@@ -12,7 +12,9 @@
     "dev-mosca": "nodemon ./broker-mosca.js",
     "dev-aedes": "nodemon ./broker-aedes.js",
     "humidity-pub": "nodemon ./humidity-pub-client.js",
-    "temperature-pub": "nodemon ./temperature-pub-client.js"
+    "temperature-pub": "nodemon ./temperature-pub-client.js",
+    "rainfall-level-pub": "nodemon ./rainfall-level-pub-client.js",
+    "poro-pressure-pub": "nodemon ./poro-pressure-pub-client.js"
   },
   "repository": {
     "type": "git",
