@@ -79,7 +79,7 @@ aedes.on('publish', function(packet, client) {
     }
 });
 
-async function checkIsDeviceWorking(deviceId, measurementType) {
+async function fixMeasuredValue(value, deviceId, measurementType) {
     const device = await Device.findOne({
         _id: deviceId, 
         isActive: true, 
@@ -88,21 +88,50 @@ async function checkIsDeviceWorking(deviceId, measurementType) {
                 measurementType: measurementType
             }
         }
-    });
+    }, {"measuredDataTypes.$": 1});
     if (device) {
-        return true;
+        const sensorGain = device.measuredDataTypes[0].gain;
+        const sensorOffset = device.measuredDataTypes[0].offSet;
+        const fixedValue = (value - sensorOffset)/sensorGain;
+        return fixedValue;
     }
     else {
-        return false;
+        return null;
+    }
+}
+
+async function fixMeasuredValues(values, deviceId, measurementType) {
+    const device = await Device.findOne({
+        _id: deviceId, 
+        isActive: true, 
+        measuredDataTypes: {
+            $elemMatch: {
+                measurementType: measurementType
+            }
+        }
+    }, {"measuredDataTypes.$": 1});
+    if (device) {
+        const sensorGain = device.measuredDataTypes[0].gain;
+        const sensorOffset = device.measuredDataTypes[0].offSet;
+        const fixedValueX = (values[0] - sensorOffset)/sensorGain;
+        const fixedValueY = (values[1]  - sensorOffset)/sensorGain;
+        const fixedValueW = (values[2]  - sensorOffset)/sensorGain;
+        return [fixedValueX, fixedValueY, fixedValueW];
+    }
+    else {
+        return null;
     }
 }
 
 async function saveLinearAccelerationData(packetData) {
-    const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId, 'Linear Acceleration');
-    if (!isDeviceWorking) {
+    const fixedMeasuredValues =  await fixMeasuredValues([packetData.acelX, packetData.acelY, packetData.acelZ], packetData.deviceId, 'Linear Acceleration');
+    if (!fixedMeasuredValues) {
         return;
     }
     packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
+    packetData.acelX = fixedMeasuredValues[0];
+    packetData.acelY = fixedMeasuredValues[1];
+    packetData.acelZ = fixedMeasuredValues[2];
     const vibration = Object.assign({}, packetData);
     try {
         await LinearAcceleration.create(vibration);
@@ -115,11 +144,14 @@ async function saveLinearAccelerationData(packetData) {
 }
 
 async function saveAngularAccelerationData(packetData) {
-    const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId, 'Angular Acceleration');
-    if (!isDeviceWorking) {
+    const fixedMeasuredValues =  await fixMeasuredValues([packetData.alphaX, packetData.alphaY, packetData.alphaZ], packetData.deviceId, 'Angular Acceleration');
+    if (!fixedMeasuredValues) {
         return;
     }
     packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
+    packetData.alphaX = fixedMeasuredValues[0];
+    packetData.alphaY = fixedMeasuredValues[1];
+    packetData.alphaZ = fixedMeasuredValues[2];
     const vibration = Object.assign({}, packetData);
     try {
         await AngularAcceleration.create(vibration);
@@ -132,11 +164,12 @@ async function saveAngularAccelerationData(packetData) {
 }
 
 async function saveHumidityData(packetData) {
-    const isDeviceWorking =  await checkIsDeviceWorking(packetData.deviceId, 'Humidity');
-    if (!isDeviceWorking) {
+    const fixedMeasuredValue =  await fixMeasuredValue(packetData.value, packetData.deviceId, 'Humidity');
+    if (!fixedMeasuredValue) {
         return;
     }
     packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
+    packetData.value = fixedMeasuredValue;
     const humidity = Object.assign({}, packetData);
     try {
         await Humidity.create(humidity);
@@ -149,11 +182,12 @@ async function saveHumidityData(packetData) {
 }
 
 async function saveTemperatureData(packetData) {
-    const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId, 'Temperature');
-    if (!isDeviceWorking) {
+    const fixedMeasuredValue =  await fixMeasuredValue(packetData.value, packetData.deviceId, 'Temperature');
+    if (!fixedMeasuredValue) {
         return;
     }
     packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
+    packetData.value = fixedMeasuredValue;
     const temperature = Object.assign({}, packetData);
     try {
         await Temperature.create(temperature);
@@ -166,11 +200,12 @@ async function saveTemperatureData(packetData) {
 }
 
 async function saveRainfallLevelData(packetData) {
-    const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId, 'Rainfall Level');
-    if (!isDeviceWorking) {
+    const fixedMeasuredValue =  await fixMeasuredValue(packetData.value, packetData.deviceId, 'Rainfall Level');
+    if (!fixedMeasuredValue) {
         return;
     }
     packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
+    packetData.value = fixedMeasuredValue;
     const rainfallLevel = Object.assign({}, packetData);
     try {
         await RainfallLevel.create(rainfallLevel);
@@ -183,11 +218,12 @@ async function saveRainfallLevelData(packetData) {
 }
 
 async function savePoroPressureData(packetData) {
-    const isDeviceWorking = await checkIsDeviceWorking(packetData.deviceId, 'Pore Pressure');
-    if (!isDeviceWorking) {
+    const fixedMeasuredValue =  await fixMeasuredValue(packetData.value, packetData.deviceId, 'Pore Pressure');
+    if (!fixedMeasuredValue) {
         return;
     }
     packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
+    packetData.value = fixedMeasuredValue;
     const poroPressure = Object.assign({}, packetData);
     try {
         await PoroPressure.create(poroPressure);

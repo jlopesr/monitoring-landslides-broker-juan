@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-const measuredDataType = new Schema({ measurementTypeId: mongoose.ObjectId, measurementType: String, unit: String });
+const measuredDataType = new Schema({ measurementTypeId: mongoose.ObjectId, measurementType: String, unit: String, gain: { type: Number, default: 1 }, offSet:  { type: Number, default: 0 } });
 
 const Device = mongoose.model('Devices', {
     name: String,
