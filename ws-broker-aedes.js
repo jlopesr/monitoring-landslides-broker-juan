@@ -93,7 +93,7 @@ async function fixMeasuredValue(value, deviceId, measurementType) {
         const sensorGain = device.measuredDataTypes[0].gain;
         const sensorOffset = device.measuredDataTypes[0].offSet;
         const fixedValue = (value - sensorOffset)/sensorGain;
-        return fixedValue;
+        return Math.round(fixedValue * 100) / 100;
     }
     else {
         return null;
@@ -116,7 +116,7 @@ async function fixMeasuredValues(values, deviceId, measurementType) {
         const fixedValueX = (values[0] - sensorOffset)/sensorGain;
         const fixedValueY = (values[1]  - sensorOffset)/sensorGain;
         const fixedValueW = (values[2]  - sensorOffset)/sensorGain;
-        return [fixedValueX, fixedValueY, fixedValueW];
+        return [Math.round(fixedValueX * 100) / 100, Math.round(fixedValueY * 100) / 100, Math.round(fixedValueW * 100) / 100];
     }
     else {
         return null;
