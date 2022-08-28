@@ -3,13 +3,8 @@ const aedes = require("aedes")();
 const httpServer = require("http").createServer();
 const ws = require("websocket-stream");
 require('dotenv').config();
-const LinearAcceleration = require('./models/LinearAcceleration');
-const AngularAcceleration = require('./models/AngularAcceleration');
-const Humidity = require('./models/Humidity');
-const Temperature = require('./models/Temperature');
-const RainfallLevel = require('./models/RainfallLevel');
-const PoroPressure = require('./models/PoroPressure');
 const Device = require('./models/Device');
+const IotData = require('./models/IotData');
 
 const DB_USER = process.env.DB_USER;
 const DB_PASSWORD = process.env.DB_PASSWORD;
@@ -93,7 +88,9 @@ async function fixMeasuredValue(value, deviceId, measurementType) {
         const sensorGain = device.measuredDataTypes[0].gain;
         const sensorOffset = device.measuredDataTypes[0].offSet;
         const fixedValue = (value - sensorOffset)/sensorGain;
-        return Math.round(fixedValue * 100) / 100;
+        const fixedMeasuredValue = Math.round(fixedValue * 100) / 100;
+        const measurementTypeId = device.measuredDataTypes[0].measurementTypeId;
+        return {measurementTypeId, fixedMeasuredValue};
     }
     else {
         return null;
@@ -116,7 +113,9 @@ async function fixMeasuredValues(values, deviceId, measurementType) {
         const fixedValueX = (values[0] - sensorOffset)/sensorGain;
         const fixedValueY = (values[1]  - sensorOffset)/sensorGain;
         const fixedValueW = (values[2]  - sensorOffset)/sensorGain;
-        return [Math.round(fixedValueX * 100) / 100, Math.round(fixedValueY * 100) / 100, Math.round(fixedValueW * 100) / 100];
+        const fixedMeasuredValues = [Math.round(fixedValueX * 100) / 100, Math.round(fixedValueY * 100) / 100, Math.round(fixedValueW * 100) / 100];
+        const measurementTypeId = device.measuredDataTypes[0].measurementTypeId;
+        return {measurementTypeId, fixedMeasuredValues};
     }
     else {
         return null;
@@ -124,17 +123,21 @@ async function fixMeasuredValues(values, deviceId, measurementType) {
 }
 
 async function saveLinearAccelerationData(packetData) {
-    const fixedMeasuredValues =  await fixMeasuredValues([packetData.acelX, packetData.acelY, packetData.acelZ], packetData.deviceId, 'Linear Acceleration');
-    if (!fixedMeasuredValues) {
+    const fixedData =  await fixMeasuredValues([packetData.acelX, packetData.acelY, packetData.acelZ], packetData.deviceId, 'Linear Acceleration');
+    if (!fixedData) {
         return;
     }
-    packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
-    packetData.acelX = fixedMeasuredValues[0];
-    packetData.acelY = fixedMeasuredValues[1];
-    packetData.acelZ = fixedMeasuredValues[2];
-    const vibration = Object.assign({}, packetData);
+    const vibration = {
+        deviceId: mongoose.Types.ObjectId(packetData.deviceId),
+        measurementTypeId: mongoose.Types.ObjectId(fixedData.measurementTypeId),
+        value: {
+            acelX: fixedData.fixedMeasuredValues[0],
+            acelY: fixedData.fixedMeasuredValues[1],
+            acelZ: fixedData.fixedMeasuredValues[2]
+        }
+    };
     try {
-        await LinearAcceleration.create(vibration);
+        await IotData.create(vibration);
         console.log('====================Linear Acceleration Data saved in Mongo DB!====================');
         console.log(vibration);
     }
@@ -144,17 +147,21 @@ async function saveLinearAccelerationData(packetData) {
 }
 
 async function saveAngularAccelerationData(packetData) {
-    const fixedMeasuredValues =  await fixMeasuredValues([packetData.alphaX, packetData.alphaY, packetData.alphaZ], packetData.deviceId, 'Angular Acceleration');
-    if (!fixedMeasuredValues) {
+    const fixedData =  await fixMeasuredValues([packetData.alphaX, packetData.alphaY, packetData.alphaZ], packetData.deviceId, 'Angular Acceleration');
+    if (!fixedData) {
         return;
     }
-    packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
-    packetData.alphaX = fixedMeasuredValues[0];
-    packetData.alphaY = fixedMeasuredValues[1];
-    packetData.alphaZ = fixedMeasuredValues[2];
-    const vibration = Object.assign({}, packetData);
+    const vibration = {
+        deviceId: mongoose.Types.ObjectId(packetData.deviceId),
+        measurementTypeId: mongoose.Types.ObjectId(fixedData.measurementTypeId),
+        value: {
+            alphaX: fixedData.fixedMeasuredValues[0],
+            alphaY: fixedData.fixedMeasuredValues[1],
+            alphaZ: fixedData.fixedMeasuredValues[2]
+        }
+    };
     try {
-        await AngularAcceleration.create(vibration);
+        await IotData.create(vibration);
         console.log('====================Angular Acceleration Data saved in Mongo DB!====================');
         console.log(vibration);
     }
@@ -164,15 +171,19 @@ async function saveAngularAccelerationData(packetData) {
 }
 
 async function saveHumidityData(packetData) {
-    const fixedMeasuredValue =  await fixMeasuredValue(packetData.value, packetData.deviceId, 'Humidity');
-    if (!fixedMeasuredValue) {
+    const fixedData =  await fixMeasuredValue(packetData.humidity, packetData.deviceId, 'Humidity');
+    if (!fixedData) {
         return;
     }
-    packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
-    packetData.value = fixedMeasuredValue;
-    const humidity = Object.assign({}, packetData);
+    const humidity = {
+        deviceId: mongoose.Types.ObjectId(packetData.deviceId),
+        measurementTypeId: mongoose.Types.ObjectId(fixedData.measurementTypeId),
+        value: {
+            humidity: fixedData.fixedMeasuredValue
+        }
+    }
     try {
-        await Humidity.create(humidity);
+        await IotData.create(humidity);
         console.log('====================Humidity Data saved in Mongo DB!====================');
         console.log(humidity);
     }
@@ -182,15 +193,19 @@ async function saveHumidityData(packetData) {
 }
 
 async function saveTemperatureData(packetData) {
-    const fixedMeasuredValue =  await fixMeasuredValue(packetData.value, packetData.deviceId, 'Temperature');
-    if (!fixedMeasuredValue) {
+    const fixedData =  await fixMeasuredValue(packetData.temperature, packetData.deviceId, 'Temperature');
+    if (!fixedData) {
         return;
     }
-    packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
-    packetData.value = fixedMeasuredValue;
-    const temperature = Object.assign({}, packetData);
+    const temperature = {
+        deviceId: mongoose.Types.ObjectId(packetData.deviceId),
+        measurementTypeId: mongoose.Types.ObjectId(fixedData.measurementTypeId),
+        value: {
+            temperature: fixedData.fixedMeasuredValue
+        }
+    }
     try {
-        await Temperature.create(temperature);
+        await IotData.create(temperature);
         console.log('====================Temperature Data saved in Mongo DB!====================');
         console.log(temperature);
     }
@@ -200,15 +215,19 @@ async function saveTemperatureData(packetData) {
 }
 
 async function saveRainfallLevelData(packetData) {
-    const fixedMeasuredValue =  await fixMeasuredValue(packetData.value, packetData.deviceId, 'Rainfall Level');
-    if (!fixedMeasuredValue) {
+    const fixedData =  await fixMeasuredValue(packetData.rainfallLevel, packetData.deviceId, 'Rainfall Level');
+    if (!fixedData) {
         return;
     }
-    packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
-    packetData.value = fixedMeasuredValue;
-    const rainfallLevel = Object.assign({}, packetData);
+    const rainfallLevel = {
+        deviceId: mongoose.Types.ObjectId(packetData.deviceId),
+        measurementTypeId: mongoose.Types.ObjectId(fixedData.measurementTypeId),
+        value: {
+            rainfallLevel: fixedData.fixedMeasuredValue
+        }
+    }
     try {
-        await RainfallLevel.create(rainfallLevel);
+        await IotData.create(rainfallLevel);
         console.log('====================Rainfall level Data saved in Mongo DB!====================');
         console.log(rainfallLevel);
     }
@@ -218,15 +237,19 @@ async function saveRainfallLevelData(packetData) {
 }
 
 async function savePoroPressureData(packetData) {
-    const fixedMeasuredValue =  await fixMeasuredValue(packetData.value, packetData.deviceId, 'Pore Pressure');
-    if (!fixedMeasuredValue) {
+    const fixedData =  await fixMeasuredValue(packetData.poroPressure, packetData.deviceId, 'Pore Pressure');
+    if (!fixedData) {
         return;
     }
-    packetData.deviceId = mongoose.Types.ObjectId(packetData.deviceId);
-    packetData.value = fixedMeasuredValue;
-    const poroPressure = Object.assign({}, packetData);
+    const poroPressure = {
+        deviceId: mongoose.Types.ObjectId(packetData.deviceId),
+        measurementTypeId: mongoose.Types.ObjectId(fixedData.measurementTypeId),
+        value: {
+            poroPressure: fixedData.fixedMeasuredValue
+        }
+    }
     try {
-        await PoroPressure.create(poroPressure);
+        await IotData.create(poroPressure);
         console.log('====================Poro pressure Data saved in Mongo DB!====================');
         console.log(poroPressure);
     }

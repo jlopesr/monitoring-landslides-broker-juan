@@ -2,8 +2,8 @@ var mqtt = require('mqtt');
 require('dotenv').config();
 //ws://localhost:1883
 //ws://monitoring-landslides-broker.herokuapp.com
-var topic = 'temperatureData';
-var deviceId = '62c97c514f13775e9ce6e6e5';
+var topic = 'linearAccelerationData';
+var deviceId = '62c8cf0794257003d4bf85e5';
 var username = process.env.BROKER_USER_NAME;
 var password = process.env.BROKER_PASSWORD;
 var client = mqtt.connect('ws://monitoring-landslides-broker.herokuapp.com', {username, password});
@@ -13,7 +13,9 @@ client.on('connect', () => {
     setInterval(() => {
         var message = {
             deviceId: deviceId,
-            temperature: getRandomInt(0, 35)
+            alphaX: getRandomInt(5, 15),
+            alphaY: getRandomInt(5, 15),
+            alphaZ: getRandomInt(5, 15)
         }
         client.publish(topic, JSON.stringify(message));
         console.log('===================message sent!===================');
