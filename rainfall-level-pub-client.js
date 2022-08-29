@@ -3,7 +3,7 @@ require('dotenv').config();
 //ws://localhost:1883
 //ws://monitoring-landslides-broker.herokuapp.com
 var topic = 'rainfallLevelData';
-var deviceId = '62cdce9f55ac810106af0c35';
+var deviceId = '630c0b1e13e241f9e3e9ca69';
 var username = process.env.BROKER_USER_NAME;
 var password = process.env.BROKER_PASSWORD;
 var client = mqtt.connect('ws://monitoring-landslides-broker.herokuapp.com', {username, password});
