@@ -266,11 +266,11 @@ async function saveRainfallLevelData(packetData) {
 }
 
 async function savePressureData(packetData) {
-    const fixedData =  await fixMeasuredValue(packetData.poroPressure, packetData.deviceId, measurementTypes.PRESSURE);
+    const fixedData =  await fixMeasuredValue(packetData.pressure, packetData.deviceId, measurementTypes.PRESSURE);
     if (!fixedData) {
         return;
     }
-    const poroPressure = {
+    const pressure = {
         deviceId: mongoose.Types.ObjectId(packetData.deviceId),
         measurementTypeId: mongoose.Types.ObjectId(fixedData.measurementTypeId),
         value: {
@@ -278,9 +278,9 @@ async function savePressureData(packetData) {
         }
     }
     try {
-        await IotData.create(poroPressure);
+        await IotData.create(pressure);
         console.log('====================Pressure Data saved in Mongo DB!====================');
-        console.log(poroPressure);
+        console.log(pressure);
     }
     catch (error) {
         console.log(error);
