@@ -5,6 +5,8 @@ const ws = require("websocket-stream");
 require('dotenv').config();
 const Device = require('./models/Device');
 const IotData = require('./models/IotData');
+const measurementTypes = require('./entities/measurementTypes');
+const Math = require('mathjs')
 
 const DB_USER = process.env.DB_USER;
 const DB_PASSWORD = process.env.DB_PASSWORD;
@@ -48,29 +50,29 @@ aedes.on('clientDisconnect', function (client) {
 
 aedes.on('publish', function(packet, client) {
     const packetTopic = packet.topic.toString();
-    if(packetTopic == 'linearAccelerationData') {
+    if(packetTopic == measurementTypes.LINEAR_ACCELERATION) {
         var packetData = JSON.parse(packet.payload.toString());
         saveLinearAccelerationData(packetData);
     }
-    else if (packetTopic == 'angularAccelerationData') {
+    else if (packetTopic == measurementTypes.ANGULAR_VELOCITY) {
         var packetData = JSON.parse(packet.payload.toString());
-        saveAngularAccelerationData(packetData);
+        saveAngularVelocityData(packetData);
     } 
-    else if (packetTopic == 'humidityData') {
+    else if (packetTopic == measurementTypes.HUMIDITY) {
         var packetData = JSON.parse(packet.payload.toString());
         saveHumidityData(packetData);
     }
-    else if (packetTopic == 'temperatureData') {
+    else if (packetTopic == measurementTypes.TEMPERATURE) {
         var packetData = JSON.parse(packet.payload.toString());
         saveTemperatureData(packetData);
     }
-    else if (packetTopic == 'rainfallLevelData') {
+    else if (packetTopic == measurementTypes.RAINFALL_LEVEL) {
         var packetData = JSON.parse(packet.payload.toString());
         saveRainfallLevelData(packetData);
     }
-    else if (packetTopic == 'poroPressureData') {
+    else if (packetTopic == measurementTypes.PRESSURE) {
         var packetData = JSON.parse(packet.payload.toString());
-        savePoroPressureData(packetData);
+        savePressureData(packetData);
     }
 });
 
@@ -85,12 +87,25 @@ async function fixMeasuredValue(value, deviceId, measurementType) {
         }
     }, {"measuredDataTypes.$": 1});
     if (device) {
-        const sensorGain = device.measuredDataTypes[0].gain;
-        const sensorOffset = device.measuredDataTypes[0].offSet;
-        const fixedValue = (value - sensorOffset)/sensorGain;
-        const fixedMeasuredValue = Math.round(fixedValue * 100) / 100;
-        const measurementTypeId = device.measuredDataTypes[0].measurementTypeId;
-        return {measurementTypeId, fixedMeasuredValue};
+        try {
+            const parser = Math.parser()
+            let fixedValue = 0;
+            const calibrationCurve = device.measuredDataTypes[0].calibrationCurve;
+            if (calibrationCurve) {
+                parser.evaluate(calibrationCurve); 
+                fixedValue = parser.evaluate(`f(${value})`); 
+            }
+            else {
+                fixedValue = value;
+            }
+            const fixedMeasuredValue = Math.round(fixedValue * 100) / 100;
+            const measurementTypeId = device.measuredDataTypes[0].measurementTypeId;
+            return {measurementTypeId, fixedMeasuredValue};
+        }
+        catch (error) {
+            console.log(`Error when calculating device ${deviceId} calibration curve`);
+            return null;
+        } 
     }
     else {
         return null;
@@ -106,16 +121,29 @@ async function fixMeasuredValues(values, deviceId, measurementType) {
                 measurementType: measurementType
             }
         }
-    }, {"measuredDataTypes.$": 1});
+    });
     if (device) {
-        const sensorGain = device.measuredDataTypes[0].gain;
-        const sensorOffset = device.measuredDataTypes[0].offSet;
-        const fixedValueX = (values[0] - sensorOffset)/sensorGain;
-        const fixedValueY = (values[1]  - sensorOffset)/sensorGain;
-        const fixedValueW = (values[2]  - sensorOffset)/sensorGain;
-        const fixedMeasuredValues = [Math.round(fixedValueX * 100) / 100, Math.round(fixedValueY * 100) / 100, Math.round(fixedValueW * 100) / 100];
-        const measurementTypeId = device.measuredDataTypes[0].measurementTypeId;
-        return {measurementTypeId, fixedMeasuredValues};
+        try {
+            const fixedMeasuredValues = [];
+            const parser = Math.parser()
+            device.measuredDataTypes.filter(obj => obj.measurementType === measurementType).forEach((measuredDataType, index) => {
+                const calibrationCurve = measuredDataType.calibrationCurve;
+                if (calibrationCurve) {
+                    parser.evaluate(calibrationCurve); 
+                    const fixedValue = parser.evaluate(`f(${values[index]})`); 
+                    fixedMeasuredValues.push(Math.round(fixedValue * 100) / 100);
+                }
+                else {
+                    fixedMeasuredValues.push(Math.round(values[index] * 100) / 100);
+                }
+            });
+            const measurementTypeId = device.measuredDataTypes[0].measurementTypeId;
+            return {measurementTypeId, fixedMeasuredValues};
+        }
+        catch (error) {
+            console.log(`Error when calculating device ${deviceId} calibration curve`);
+            return null;
+        } 
     }
     else {
         return null;
@@ -123,7 +151,7 @@ async function fixMeasuredValues(values, deviceId, measurementType) {
 }
 
 async function saveLinearAccelerationData(packetData) {
-    const fixedData =  await fixMeasuredValues([packetData.acelX, packetData.acelY, packetData.acelZ], packetData.deviceId, 'Linear Acceleration');
+    const fixedData =  await fixMeasuredValues([packetData.acelX, packetData.acelY, packetData.acelZ], packetData.deviceId, measurementTypes.LINEAR_ACCELERATION);
     if (!fixedData) {
         return;
     }
@@ -146,8 +174,8 @@ async function saveLinearAccelerationData(packetData) {
     }
 }
 
-async function saveAngularAccelerationData(packetData) {
-    const fixedData =  await fixMeasuredValues([packetData.alphaX, packetData.alphaY, packetData.alphaZ], packetData.deviceId, 'Angular Acceleration');
+async function saveAngularVelocityData(packetData) {
+    const fixedData =  await fixMeasuredValues([packetData.wX, packetData.wY, packetData.wZ], packetData.deviceId, measurementTypes.ANGULAR_VELOCITY);
     if (!fixedData) {
         return;
     }
@@ -155,9 +183,9 @@ async function saveAngularAccelerationData(packetData) {
         deviceId: mongoose.Types.ObjectId(packetData.deviceId),
         measurementTypeId: mongoose.Types.ObjectId(fixedData.measurementTypeId),
         value: {
-            alphaX: fixedData.fixedMeasuredValues[0],
-            alphaY: fixedData.fixedMeasuredValues[1],
-            alphaZ: fixedData.fixedMeasuredValues[2]
+            wX: fixedData.fixedMeasuredValues[0],
+            wY: fixedData.fixedMeasuredValues[1],
+            wZ: fixedData.fixedMeasuredValues[2]
         }
     };
     try {
@@ -171,7 +199,7 @@ async function saveAngularAccelerationData(packetData) {
 }
 
 async function saveHumidityData(packetData) {
-    const fixedData =  await fixMeasuredValue(packetData.humidity, packetData.deviceId, 'Humidity');
+    const fixedData =  await fixMeasuredValue(packetData.humidity, packetData.deviceId, measurementTypes.HUMIDITY);
     if (!fixedData) {
         return;
     }
@@ -193,7 +221,7 @@ async function saveHumidityData(packetData) {
 }
 
 async function saveTemperatureData(packetData) {
-    const fixedData =  await fixMeasuredValue(packetData.temperature, packetData.deviceId, 'Temperature');
+    const fixedData =  await fixMeasuredValue(packetData.temperature, packetData.deviceId, measurementTypes.TEMPERATURE);
     if (!fixedData) {
         return;
     }
@@ -215,7 +243,7 @@ async function saveTemperatureData(packetData) {
 }
 
 async function saveRainfallLevelData(packetData) {
-    const fixedData =  await fixMeasuredValue(packetData.rainfallLevel, packetData.deviceId, 'Rainfall Level');
+    const fixedData =  await fixMeasuredValue(packetData.rainfallLevel, packetData.deviceId, measurementTypes.RAINFALL_LEVEL);
     if (!fixedData) {
         return;
     }
@@ -236,8 +264,8 @@ async function saveRainfallLevelData(packetData) {
     }
 }
 
-async function savePoroPressureData(packetData) {
-    const fixedData =  await fixMeasuredValue(packetData.poroPressure, packetData.deviceId, 'Pore Pressure');
+async function savePressureData(packetData) {
+    const fixedData =  await fixMeasuredValue(packetData.poroPressure, packetData.deviceId, measurementTypes.PRESSURE);
     if (!fixedData) {
         return;
     }
@@ -245,12 +273,12 @@ async function savePoroPressureData(packetData) {
         deviceId: mongoose.Types.ObjectId(packetData.deviceId),
         measurementTypeId: mongoose.Types.ObjectId(fixedData.measurementTypeId),
         value: {
-            poroPressure: fixedData.fixedMeasuredValue
+            pressure: fixedData.fixedMeasuredValue
         }
     }
     try {
         await IotData.create(poroPressure);
-        console.log('====================Poro pressure Data saved in Mongo DB!====================');
+        console.log('====================Pressure Data saved in Mongo DB!====================');
         console.log(poroPressure);
     }
     catch (error) {

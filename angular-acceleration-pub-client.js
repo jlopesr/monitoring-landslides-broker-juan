@@ -1,8 +1,9 @@
 var mqtt = require('mqtt');
 require('dotenv').config();
+const measurementTypes = require('./entities/measurementTypes');
 //ws://localhost:1883
 //ws://monitoring-landslides-broker.herokuapp.com
-var topic = 'angularAccelerationData';
+var topic = measurementTypes.ANGULAR_VELOCITY;
 var deviceId = '630c0b1e13e241f9e3e9ca69';
 var username = process.env.BROKER_USER_NAME;
 var password = process.env.BROKER_PASSWORD;
@@ -13,9 +14,9 @@ client.on('connect', () => {
     setInterval(() => {
         var message = {
             deviceId: deviceId,
-            alphaX: getRandomInt(-10, 10),
-            alphaY: getRandomInt(-10, 10),
-            alphaZ: getRandomInt(-10, 10)
+            wX: getRandomInt(-10, 10),
+            wY: getRandomInt(-10, 10),
+            wZ: getRandomInt(-10, 10)
         }
         client.publish(topic, JSON.stringify(message));
         console.log('===================message sent!===================');

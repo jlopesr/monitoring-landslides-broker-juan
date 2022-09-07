@@ -14,7 +14,7 @@
     "humidity-pub": "nodemon ./humidity-pub-client.js",
     "temperature-pub": "nodemon ./temperature-pub-client.js",
     "rainfall-level-pub": "nodemon ./rainfall-level-pub-client.js",
-    "poro-pressure-pub": "nodemon ./poro-pressure-pub-client.js",
+    "pressure-pub": "nodemon ./pressure-pub-client.js",
     "linear-acceleration-pub": "nodemon ./linear-acceleration-pub-client.js",
     "angular-acceleration-pub": "nodemon ./angular-acceleration-pub-client.js"
   },
@@ -33,6 +33,7 @@
     "aedes-server-factory": "^0.2.1",
     "dotenv": "^16.0.0",
     "jsonschema": "^1.2.6",
+    "mathjs": "^11.1.0",
     "mongoose": "^6.2.7",
     "mosca": "^2.8.3",
     "mqtt": "^4.3.7",
