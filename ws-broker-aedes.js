@@ -126,7 +126,8 @@ async function fixMeasuredValues(values, deviceId, measurementType) {
         try {
             const fixedMeasuredValues = [];
             const parser = Math.parser()
-            device.measuredDataTypes.filter(obj => obj.measurementType === measurementType).forEach((measuredDataType, index) => {
+            const filteredMeasurementTypes = device.measuredDataTypes.filter(obj => obj.measurementType === measurementType);
+            filteredMeasurementTypes.forEach((measuredDataType, index) => {
                 const calibrationCurve = measuredDataType.calibrationCurve;
                 if (calibrationCurve) {
                     parser.evaluate(calibrationCurve); 
@@ -137,7 +138,7 @@ async function fixMeasuredValues(values, deviceId, measurementType) {
                     fixedMeasuredValues.push(Math.round(values[index] * 100) / 100);
                 }
             });
-            const measurementTypeId = device.measuredDataTypes[0].measurementTypeId;
+            const measurementTypeId = filteredMeasurementTypes[0].measurementTypeId;
             return {measurementTypeId, fixedMeasuredValues};
         }
         catch (error) {
@@ -190,7 +191,7 @@ async function saveAngularVelocityData(packetData) {
     };
     try {
         await IotData.create(vibration);
-        console.log('====================Angular Acceleration Data saved in Mongo DB!====================');
+        console.log('====================Angular Velocity Data saved in Mongo DB!====================');
         console.log(vibration);
     }
     catch (error) {

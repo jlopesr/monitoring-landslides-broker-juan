@@ -4,7 +4,7 @@ const measurementTypes = require('./entities/measurementTypes');
 //http://localhost:1883
 //ws://monitoring-landslides-broker.herokuapp.com
 var topic = measurementTypes.HUMIDITY;
-var deviceId = '62c97c514f13775e9ce6e6e5';
+var deviceId = '631680220c880dd427193473';
 var username = process.env.BROKER_USER_NAME;
 var password = process.env.BROKER_PASSWORD;
 var client = mqtt.connect('ws://monitoring-landslides-broker.herokuapp.com', {username, password});

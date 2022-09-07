@@ -4,7 +4,7 @@ const measurementTypes = require('./entities/measurementTypes');
 //ws://localhost:1883
 //ws://monitoring-landslides-broker.herokuapp.com
 var topic = measurementTypes.TEMPERATURE;
-var deviceId = '62c97c514f13775e9ce6e6e5';
+var deviceId = '6318ab782229cfbd64c329d2';
 var username = process.env.BROKER_USER_NAME;
 var password = process.env.BROKER_PASSWORD;
 var client = mqtt.connect('ws://monitoring-landslides-broker.herokuapp.com', {username, password});

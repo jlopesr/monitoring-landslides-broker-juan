@@ -16,7 +16,7 @@
     "rainfall-level-pub": "nodemon ./rainfall-level-pub-client.js",
     "pressure-pub": "nodemon ./pressure-pub-client.js",
     "linear-acceleration-pub": "nodemon ./linear-acceleration-pub-client.js",
-    "angular-acceleration-pub": "nodemon ./angular-acceleration-pub-client.js"
+    "angular-velocity-pub": "nodemon ./angular-velocity-pub-client.js"
   },
   "repository": {
     "type": "git",
