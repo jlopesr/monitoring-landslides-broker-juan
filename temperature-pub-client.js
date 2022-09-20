@@ -8,18 +8,22 @@ var deviceId = '6318ab782229cfbd64c329d2';
 var username = process.env.BROKER_USER_NAME;
 var password = process.env.BROKER_PASSWORD;
 var client = mqtt.connect('ws://monitoring-landslides-broker.herokuapp.com', {username, password});
+let isSetIntervalRunning = false;
 
 client.on('connect', () => {
     console.log('Connected to broker!')
-    setInterval(() => {
-        var message = {
-            deviceId: deviceId,
-            temperature: getRandomInt(0, 35)
-        }
-        client.publish(topic, JSON.stringify(message));
-        console.log('===================message sent!===================');
-        console.log(message);
-    }, 10000);
+    if (!isSetIntervalRunning) {
+        isSetIntervalRunning = true;
+        setInterval(() => {
+            var message = {
+                deviceId: deviceId,
+                temperature: getRandomInt(0, 35)
+            }
+            client.publish(topic, JSON.stringify(message));
+            console.log('===================message sent!===================');
+            console.log(message);
+        }, 10000);
+    }
 });
 
 function getRandomInt(min, max) {
