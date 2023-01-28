@@ -15,12 +15,13 @@ const BROKER_USER_NAME = process.env.BROKER_USER_NAME;
 const BROKER_PASSWORD = process.env.BROKER_PASSWORD;
 let isMongoConnected = false;
 
-mongoose.connect(`mongodb+srv://${DB_USER}:${DB_PASSWORD}@field-data-cluster.xz66x.mongodb.net/fieldData?retryWrites=true&w=majority`)
+mongoose.connect(`mongodb+srv://${DB_USER}:${DB_PASSWORD}@juan-lora-monitoramento.5cvtg91.mongodb.net/?retryWrites=true&w=majority`)
     .then(() => {
         console.log('Connected to Mongodb!');
         isMongoConnected = true;
     })
     .catch((error) => {console.log(error);});
+
 
 ws.createServer({ server: httpServer }, aedes.handle);
 
